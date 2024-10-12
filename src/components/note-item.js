@@ -95,7 +95,6 @@ class NotesItem extends HTMLElement {
 
   #handleDelete(event) {
     const id = event.target.dataset.id;
-
     console.log(`Delete note with id: ${id}`);
   }
 
@@ -106,66 +105,85 @@ class NotesItem extends HTMLElement {
         font-family: 'Arial', sans-serif;
       }
       .grid-wrapper {
-        padding-top: 5%;
-        display: grid;
-        justify-content: center;
+        padding: 20px;
       }
-      .grid-wrapper .all-notes {
-        padding-top: 1em;
-        text-align: left;
-        font-size: 2em;
+      .all-notes {
+        text-align: center;
         color: #1E88E5;
-        font-weight: bold;
+        margin-bottom: 20px;
       }
-      .grid-wrapper .grid-container {
+      .grid-container {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-        gap: 2em;
-        padding: 2em;
+        gap: 20px;
       }
-      .grid-container .card-note {
-        background-color: #E3F2FD;
-        opacity: 0.9;
-        border: none;
-        border-radius: 10px;
-        box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
-        padding: 1em;
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
+      .card-note {
+        background-color: #ffffff;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        padding: 16px;
+        display: flex;
+        flex-direction: column;
+        transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        position: relative;
+        overflow: hidden;
       }
-      .grid-container .card-note:hover {
-        transform: translateY(-10px);
-        box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2);
+      .card-note:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
       }
-      .card-note .date {
-        font-size: 0.70em;
-        margin-top: -9px;
-        color: #1E88E5;
-      }
-      .card-note .desc {
-        padding-top: 1em;
-        font-size: 0.90em;
-        color: #1E88E5;
-      }
-      .card-note .note-delete {
-        padding-top: 1em;
-      }
-      .note-delete .button-delete {
+      .note-number {
+        position: absolute;
+        top: 8px;
+        right: 8px;
         background-color: #1E88E5;
         color: white;
-        border: none;
-        border-radius: 5px;
-        padding: 8px;
-        cursor: pointer;
+        padding: 2px 6px;
+        border-radius: 12px;
+        font-size: 12px;
       }
-      .note-delete .button-delete:hover {
-        background-color: #1565C0;
+      .card-note h4 {
+        margin-top: 0;
+        margin-bottom: 8px;
+        font-size: 18px;
+        color: #333;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+      }
+      .card-note .date {
+        font-size: 12px;
+        color: #999;
+        margin-bottom: 12px;
+      }
+      .card-note .desc {
+        font-size: 14px;
+        color: #666;
+        margin-bottom: 16px;
+        flex-grow: 1;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        overflow: auto;
+        max-height: 150px;
+      }
+      .note-delete {
+        align-self: flex-end;
+      }
+      .button-delete {
+        background-color: #f44336;
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+        transition: background-color 0.2s ease-in-out;
+      }
+      .button-delete:hover {
+        background-color: #d32f2f;
       }
       @media (max-width: 600px) {
-        .grid-wrapper .grid-container {
+        .grid-container {
           grid-template-columns: 1fr;
-        }
-        .grid-wrapper .all-notes {
-          font-size: 1.5em; /* Adjusted for better readability on smaller screens */
         }
       }
     `;

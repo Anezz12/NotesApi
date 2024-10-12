@@ -20,16 +20,6 @@ class NoteInput extends HTMLElement {
     this.shadowRoot
       .querySelector('#description')
       .addEventListener('input', this._validateForm.bind(this));
-    this.shadowRoot
-      .querySelector('#title')
-      .addEventListener('focus', this._handleFocus.bind(this));
-    this.shadowRoot
-      .querySelector('#description')
-      .addEventListener('focus', this._handleFocus.bind(this));
-  }
-
-  _handleFocus(event) {
-    event.target.style.borderColor = '#1E88E5';
   }
 
   _updateCharCount(event) {
@@ -136,6 +126,7 @@ class NoteInput extends HTMLElement {
           --primary-dark: #1565C0;
           --error-color: #e74c3c;
           --success-color: #2ecc71;
+          --focus-color: #3498db;
         }
         
         .wrapper {
@@ -178,12 +169,13 @@ class NoteInput extends HTMLElement {
           border: 1px solid var(--primary-color);
           border-radius: 4px;
           font-size: 1rem;
-          transition: border-color 0.3s ease;
+          transition: border-color 0.3s ease, box-shadow 0.3s ease;
         }
         
         input:focus, textarea:focus {
           outline: none;
-          border-color: var(--primary-dark);
+          border-color: var(--focus-color);
+          box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.3);
         }
         
         textarea {
