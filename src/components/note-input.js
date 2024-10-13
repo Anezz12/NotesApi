@@ -95,7 +95,7 @@ class NoteInput extends HTMLElement {
     this.shadowRoot.querySelector('#description').value = '';
     this.shadowRoot.querySelector('#char-count').textContent = '0/50';
     this._showSuccess('Catatan Berhasil Ditambahkan!');
-    this._validateForm(); // Reset validation state
+    this._validateForm();
   }
 
   _showError(message) {

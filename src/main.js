@@ -6,6 +6,8 @@ import { animate, spring } from 'motion';
 const API_BASE_URL = 'https://notes-api.dicoding.dev/v2';
 const AUTH_TOKEN = '12345';
 
+let allNotes = [];
+
 // Fetch Data Notes
 const fetchNotes = async () => {
   try {
@@ -14,7 +16,8 @@ const fetchNotes = async () => {
     if (data.error) {
       throw new Error(data.message);
     }
-    return data.data;
+    allNotes = data.data;
+    return allNotes;
   } catch (error) {
     showErrorMessage(error.message);
   }
@@ -80,18 +83,63 @@ const deleteNote = async (noteId) => {
 
 // Render Notes
 const renderNotes = (notes) => {
-  const noteItems = document.querySelectorAll('note-item');
-  noteItems.forEach((noteItem) => {
-    noteItem.note = notes;
-    const shadowRoot = noteItem.shadowRoot;
-    const deleteButtons = shadowRoot.querySelectorAll('.button-delete');
-    deleteButtons.forEach((button) => {
-      button.addEventListener('click', (event) => {
-        const noteId = event.target.dataset.id;
-        deleteNote(noteId).then(renderNotes);
+  const noteItemElement = document.querySelector('note-item');
+  if (noteItemElement && noteItemElement.shadowRoot) {
+    const gridContainer =
+      noteItemElement.shadowRoot.querySelector('.grid-container');
+    if (gridContainer) {
+      gridContainer.innerHTML = ''; // Clear existing notes
+      notes.forEach((note) => {
+        gridContainer.appendChild(createNoteElement(note));
       });
-    });
-  });
+    }
+  }
+};
+
+// Create Note Element
+const createNoteElement = (note) => {
+  const card = document.createElement('div');
+  card.className = 'card-note';
+
+  const title = document.createElement('h4');
+  title.textContent = note.title;
+
+  const date = document.createElement('p');
+  date.className = 'date';
+  date.textContent = new Date(note.createdAt).toLocaleString();
+
+  const desc = document.createElement('p');
+  desc.className = 'desc';
+  desc.textContent = note.body;
+
+  const deleteWrapper = document.createElement('div');
+  deleteWrapper.className = 'note-delete';
+
+  const deleteButton = document.createElement('button');
+  deleteButton.className = 'button-delete';
+  deleteButton.textContent = 'Delete';
+  deleteButton.dataset.id = note.id;
+  deleteButton.addEventListener('click', handleDelete);
+
+  deleteWrapper.appendChild(deleteButton);
+  card.append(title, date, desc, deleteWrapper);
+  return card;
+};
+
+// Handle Delete
+const handleDelete = async (event) => {
+  const id = event.target.dataset.id;
+  allNotes = await deleteNote(id);
+  renderNotes(allNotes);
+};
+
+// Search Notes
+const searchNotes = (query) => {
+  return allNotes.filter(
+    (note) =>
+      note.title.toLowerCase().includes(query.toLowerCase()) ||
+      note.body.toLowerCase().includes(query.toLowerCase())
+  );
 };
 
 // Show Message
@@ -130,14 +178,89 @@ const hideFullPageLoading = () => {
   }
 };
 
-// Animate Full Page Loading
+// Add search
+const addSearchFunctionality = () => {
+  const noteItemElement = document.querySelector('note-item');
+  if (noteItemElement && noteItemElement.shadowRoot) {
+    let searchContainer =
+      noteItemElement.shadowRoot.querySelector('.search-container');
+    if (!searchContainer) {
+      searchContainer = document.createElement('div');
+      searchContainer.className = 'search-container';
+      searchContainer.style.marginBottom = '20px';
+      searchContainer.style.textAlign = 'center';
+
+      const searchInput = document.createElement('input');
+      searchInput.type = 'text';
+      searchInput.placeholder = 'Search notes...';
+      searchInput.style.padding = '8px';
+      searchInput.style.marginRight = '8px';
+      searchInput.style.borderRadius = '4px';
+      searchInput.style.border = '1px solid #ccc';
+
+      const searchButton = document.createElement('button');
+      searchButton.textContent = 'Search';
+      searchButton.style.padding = '8px 16px';
+      searchButton.style.backgroundColor = '#1E88E5';
+      searchButton.style.color = 'white';
+      searchButton.style.border = 'none';
+      searchButton.style.borderRadius = '4px';
+      searchButton.style.cursor = 'pointer';
+
+      searchContainer.appendChild(searchInput);
+      searchContainer.appendChild(searchButton);
+
+      const gridWrapper =
+        noteItemElement.shadowRoot.querySelector('.grid-wrapper');
+      if (gridWrapper) {
+        gridWrapper.insertBefore(searchContainer, gridWrapper.firstChild);
+      }
+
+      const performSearch = () => {
+        const query = searchInput.value;
+        const filteredNotes = searchNotes(query);
+        renderNotes(filteredNotes);
+      };
+
+      searchButton.addEventListener('click', performSearch);
+
+      searchInput.addEventListener('keyup', (event) => {
+        if (event.key === 'Enter') {
+          performSearch();
+        }
+      });
+    }
+  }
+};
+
+// Initialize App
 const initializeApp = async () => {
   showFullPageLoading();
   try {
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
-    const notes = await fetchNotes();
-    renderNotes(notes);
+    allNotes = await fetchNotes();
+
+    // Create the initial structure
+    const noteItemElement = document.querySelector('note-item');
+    if (noteItemElement) {
+      const gridWrapper = document.createElement('div');
+      gridWrapper.className = 'grid-wrapper';
+
+      const gridContainer = document.createElement('div');
+      gridContainer.className = 'grid-container';
+
+      gridWrapper.appendChild(gridContainer);
+
+      noteItemElement.shadowRoot.appendChild(gridWrapper);
+    }
+
+    // Add search
+    addSearchFunctionality();
+
+    // Render notes
+    renderNotes(allNotes);
+
     const inputNoteElement = document.querySelector('note-input');
     if (inputNoteElement) {
       animate(
@@ -146,8 +269,9 @@ const initializeApp = async () => {
         { duration: 0.5, easing: spring({ stiffness: 100, damping: 15 }) }
       );
 
-      inputNoteElement.addEventListener('note-added', (event) => {
-        createNote(event.detail).then(renderNotes);
+      inputNoteElement.addEventListener('note-added', async (event) => {
+        allNotes = await createNote(event.detail);
+        renderNotes(allNotes);
 
         animate(
           inputNoteElement,

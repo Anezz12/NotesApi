@@ -95,7 +95,12 @@ class NotesItem extends HTMLElement {
 
   #handleDelete(event) {
     const id = event.target.dataset.id;
-    console.log(`Delete note with id: ${id}`);
+    const deleteEvent = new CustomEvent('delete-note', {
+      detail: { id },
+      bubbles: true,
+      composed: true,
+    });
+    this.dispatchEvent(deleteEvent);
   }
 
   #getStyles() {
@@ -131,16 +136,6 @@ class NotesItem extends HTMLElement {
       .card-note:hover {
         transform: translateY(-5px);
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-      }
-      .note-number {
-        position: absolute;
-        top: 8px;
-        right: 8px;
-        background-color: #1E88E5;
-        color: white;
-        padding: 2px 6px;
-        border-radius: 12px;
-        font-size: 12px;
       }
       .card-note h4 {
         margin-top: 0;
