@@ -2,12 +2,14 @@ class NotesItem extends HTMLElement {
   #shadowRoot;
   #style;
   #note;
+  #filteredNotes;
 
   constructor() {
     super();
     this.#shadowRoot = this.attachShadow({ mode: 'open' });
     this.#style = document.createElement('style');
     this.#note = [];
+    this.#filteredNotes = [];
   }
 
   connectedCallback() {
@@ -20,6 +22,7 @@ class NotesItem extends HTMLElement {
       return;
     }
     this.#note = value;
+    this.#filteredNotes = value;
     this.render();
   }
 
@@ -30,6 +33,7 @@ class NotesItem extends HTMLElement {
   render() {
     this.#resetContent();
     this.#updateStyles();
+    this.#createSearchElements();
     this.#createNoteElements();
   }
 
@@ -40,6 +44,42 @@ class NotesItem extends HTMLElement {
   #updateStyles() {
     this.#style.textContent = this.#getStyles();
     this.#shadowRoot.appendChild(this.#style);
+  }
+
+  #createSearchElements() {
+    const searchContainer = document.createElement('div');
+    searchContainer.className = 'search-container';
+
+    const searchInput = document.createElement('input');
+    searchInput.type = 'text';
+    searchInput.placeholder = 'Search notes...';
+    searchInput.className = 'search-input';
+
+    const searchButton = document.createElement('button');
+    searchButton.textContent = 'Search';
+    searchButton.className = 'search-button';
+
+    searchButton.addEventListener('click', () =>
+      this.#performSearch(searchInput.value)
+    );
+    searchInput.addEventListener('keyup', (event) => {
+      if (event.key === 'Enter') {
+        this.#performSearch(searchInput.value);
+      }
+    });
+
+    searchContainer.appendChild(searchInput);
+    searchContainer.appendChild(searchButton);
+    this.#shadowRoot.appendChild(searchContainer);
+  }
+
+  #performSearch(query) {
+    this.#filteredNotes = this.#note.filter(
+      (note) =>
+        note.title.toLowerCase().includes(query.toLowerCase()) ||
+        note.body.toLowerCase().includes(query.toLowerCase())
+    );
+    this.#createNoteElements();
   }
 
   #createNoteElements() {
@@ -54,11 +94,18 @@ class NotesItem extends HTMLElement {
     const container = document.createElement('div');
     container.className = 'grid-container';
 
-    this.#note.forEach((note) => {
+    this.#filteredNotes.forEach((note) => {
       container.appendChild(this.#createNoteElement(note));
     });
 
     wrapper.appendChild(container);
+
+    // Remove existing grid-wrapper if it exists
+    const existingWrapper = this.#shadowRoot.querySelector('.grid-wrapper');
+    if (existingWrapper) {
+      this.#shadowRoot.removeChild(existingWrapper);
+    }
+
     this.#shadowRoot.appendChild(wrapper);
   }
 
@@ -108,6 +155,31 @@ class NotesItem extends HTMLElement {
       :host {
         display: block;
         font-family: 'Arial', sans-serif;
+      }
+      .search-container {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 20px;
+        padding: 20px;
+      }
+      .search-input {
+        padding: 8px;
+        margin-right: 8px;
+        border-radius: 4px;
+        border: 1px solid #ccc;
+        font-size: 14px;
+      }
+      .search-button {
+        padding: 8px 16px;
+        background-color: #1E88E5;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+      }
+      .search-button:hover {
+        background-color: #1976D2;
       }
       .grid-wrapper {
         padding: 20px;
