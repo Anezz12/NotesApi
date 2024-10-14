@@ -87,7 +87,7 @@ class NotesItem extends HTMLElement {
 
   #createToggleButton() {
     const toggleButton = document.createElement('button');
-    toggleButton.textContent = 'Show Saved Notes';
+    toggleButton.textContent = 'Lihat Catatan Tersimpan';
     toggleButton.className = 'toggle-button';
     toggleButton.addEventListener('click', () => this.#toggleSavedNotes());
     this.#shadowRoot.appendChild(toggleButton);
@@ -95,12 +95,12 @@ class NotesItem extends HTMLElement {
 
   #toggleSavedNotes() {
     const toggleButton = this.#shadowRoot.querySelector('.toggle-button');
-    if (toggleButton.textContent === 'Show Saved Notes') {
+    if (toggleButton.textContent === 'Lihat Catatan Tersimpan') {
       this.#filteredNotes = this.#savedNotes;
-      toggleButton.textContent = 'Show All Notes';
+      toggleButton.textContent = 'Lihat Semua Catatan';
     } else {
       this.#filteredNotes = this.#note;
-      toggleButton.textContent = 'Show Saved Notes';
+      toggleButton.textContent = 'Lihat Catatan Tersimpan';
     }
     this.#createNoteElements();
   }
