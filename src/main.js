@@ -2,12 +2,11 @@ import './styles/style.css';
 import './components/path.js';
 import { animate, spring } from 'motion';
 
-// API DICOIDNG & AUTH TOKEN
+// API DICODING & AUTH TOKEN
 const API_BASE_URL = 'https://notes-api.dicoding.dev/v2';
 const AUTH_TOKEN = '12345';
 
 let allNotes = [];
-let savedNotes = [];
 
 // Fetch Data Notes
 const fetchNotes = async () => {
@@ -82,25 +81,6 @@ const deleteNote = async (noteId) => {
   }
 };
 
-// Save Note
-const saveNote = (noteId) => {
-  const noteIndex = allNotes.findIndex((note) => note.id === noteId);
-  const savedIndex = savedNotes.findIndex((note) => note.id === noteId);
-
-  if (savedIndex === -1) {
-    savedNotes.push(allNotes[noteIndex]);
-  } else {
-    savedNotes.splice(savedIndex, 1);
-  }
-
-  localStorage.setItem('savedNotes', JSON.stringify(savedNotes));
-  showSuccessMessage(
-    savedIndex === -1
-      ? 'Catatan berhasil disimpan!'
-      : 'Catatan berhasil dihapus dari simpanan!'
-  );
-};
-
 // Show Message
 const showSuccessMessage = (message) => {
   Swal.fire({
@@ -144,7 +124,6 @@ const initializeApp = async () => {
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
     allNotes = await fetchNotes();
-    savedNotes = JSON.parse(localStorage.getItem('savedNotes')) || [];
 
     const noteItemElement = document.querySelector('note-item');
     if (noteItemElement) {
@@ -154,15 +133,6 @@ const initializeApp = async () => {
       noteItemElement.addEventListener('delete-note', async (event) => {
         const { id } = event.detail;
         allNotes = await deleteNote(id);
-        savedNotes = savedNotes.filter((note) => note.id !== id);
-        localStorage.setItem('savedNotes', JSON.stringify(savedNotes));
-        noteItemElement.note = allNotes;
-      });
-
-      // Add event listener for save-note event
-      noteItemElement.addEventListener('save-note', (event) => {
-        const { id } = event.detail;
-        saveNote(id);
         noteItemElement.note = allNotes;
       });
     }

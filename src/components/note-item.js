@@ -3,7 +3,6 @@ class NotesItem extends HTMLElement {
   #style;
   #note;
   #filteredNotes;
-  #savedNotes;
 
   constructor() {
     super();
@@ -11,7 +10,6 @@ class NotesItem extends HTMLElement {
     this.#style = document.createElement('style');
     this.#note = [];
     this.#filteredNotes = [];
-    this.#savedNotes = [];
   }
 
   connectedCallback() {
@@ -36,7 +34,6 @@ class NotesItem extends HTMLElement {
     this.#resetContent();
     this.#updateStyles();
     this.#createSearchElements();
-    this.#createToggleButton();
     this.#createNoteElements();
   }
 
@@ -85,26 +82,6 @@ class NotesItem extends HTMLElement {
     this.#createNoteElements();
   }
 
-  #createToggleButton() {
-    const toggleButton = document.createElement('button');
-    toggleButton.textContent = 'Lihat Catatan Tersimpan';
-    toggleButton.className = 'toggle-button';
-    toggleButton.addEventListener('click', () => this.#toggleSavedNotes());
-    this.#shadowRoot.appendChild(toggleButton);
-  }
-
-  #toggleSavedNotes() {
-    const toggleButton = this.#shadowRoot.querySelector('.toggle-button');
-    if (toggleButton.textContent === 'Lihat Catatan Tersimpan') {
-      this.#filteredNotes = this.#savedNotes;
-      toggleButton.textContent = 'Lihat Semua Catatan';
-    } else {
-      this.#filteredNotes = this.#note;
-      toggleButton.textContent = 'Lihat Catatan Tersimpan';
-    }
-    this.#createNoteElements();
-  }
-
   #createNoteElements() {
     const wrapper = document.createElement('div');
     wrapper.className = 'grid-wrapper';
@@ -150,49 +127,17 @@ class NotesItem extends HTMLElement {
     const buttonWrapper = document.createElement('div');
     buttonWrapper.className = 'note-buttons';
 
-    const saveButton = document.createElement('button');
-    saveButton.className = 'button-save';
-    saveButton.textContent = this.#savedNotes.some(
-      (savedNote) => savedNote.id === note.id
-    )
-      ? 'Unsave'
-      : 'Save';
-    saveButton.dataset.id = note.id;
-    saveButton.addEventListener('click', this.#handleSave.bind(this));
-
     const deleteButton = document.createElement('button');
     deleteButton.className = 'button-delete';
     deleteButton.textContent = 'Delete';
     deleteButton.dataset.id = note.id;
     deleteButton.addEventListener('click', this.#handleDelete.bind(this));
 
-    buttonWrapper.appendChild(saveButton);
     buttonWrapper.appendChild(deleteButton);
 
     card.append(title, date, desc, buttonWrapper);
 
     return card;
-  }
-
-  #handleSave(event) {
-    const id = event.target.dataset.id;
-    const noteIndex = this.#note.findIndex((note) => note.id === id);
-    const savedIndex = this.#savedNotes.findIndex((note) => note.id === id);
-
-    if (savedIndex === -1) {
-      this.#savedNotes.push(this.#note[noteIndex]);
-      event.target.textContent = 'Unsave';
-    } else {
-      this.#savedNotes.splice(savedIndex, 1);
-      event.target.textContent = 'Save';
-    }
-
-    const saveEvent = new CustomEvent('save-note', {
-      detail: { id, isSaved: savedIndex === -1 },
-      bubbles: true,
-      composed: true,
-    });
-    this.dispatchEvent(saveEvent);
   }
 
   #handleDelete(event) {
@@ -289,21 +234,8 @@ class NotesItem extends HTMLElement {
       }
       .note-buttons {
         display: flex;
-        justify-content: space-between;
+        justify-content: flex-end;
         margin-top: 16px;
-      }
-      .button-save {
-        background-color: #4CAF50;
-        color: white;
-        border: none;
-        padding: 8px 16px;
-        border-radius: 4px;
-        cursor: pointer;
-        font-size: 14px;
-        transition: background-color 0.2s ease-in-out;
-      }
-      .button-save:hover {
-        background-color: #45a049;
       }
       .button-delete {
         background-color: #f44336;
@@ -317,20 +249,6 @@ class NotesItem extends HTMLElement {
       }
       .button-delete:hover {
         background-color: #d32f2f;
-      }
-      .toggle-button {
-        display: block;
-        margin: 20px auto;
-        padding: 10px 20px;
-        background-color: #4CAF50;
-        color: white;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-        font-size: 16px;
-      }
-      .toggle-button:hover {
-        background-color: #45a049;
       }
       @media (max-width: 600px) {
         .grid-container {
